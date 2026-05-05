@@ -1,5 +1,8 @@
 # Ollama Local - AI Chat Assistant
 
+<img width="1918" height="1040" alt="image" src="https://github.com/user-attachments/assets/aaea36d7-5823-4538-bc52-19624e7abbf9" />
+
+
 A full-stack AI chat application with a modern React frontend and Express.js backend, supporting both **Ollama** (local LLM) and **Google Gemini** API integrations.
 
 ![AI Chat Assistant](https://img.shields.io/badge/AI-Chat%20Assistant-blue)
