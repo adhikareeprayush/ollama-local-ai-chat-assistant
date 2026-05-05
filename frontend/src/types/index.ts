@@ -11,12 +11,15 @@ export interface ChatState {
   error: string | null;
 }
 
-export interface ApiResponse {
-  candidates: Array<{
-    content: {
-      parts: Array<{ text: string }>;
-    };
-  }>;
+export interface OllamaModelInfo {
+  name: string;
+  size?: number;
+  digest?: string;
+}
+
+export interface ChatGenerateResponse {
+  content: string;
+  model: string;
 }
 
 export interface Settings {
@@ -26,4 +29,6 @@ export interface Settings {
     syntax: boolean;
     lineNumbers: boolean;
   };
+  /** Selected Ollama model tag, e.g. llama3.2:latest */
+  ollamaModel: string;
 }

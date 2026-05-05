@@ -1,4 +1,5 @@
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Layout, MessageSquare, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSettings } from '../../hooks/useSettings';
@@ -10,138 +11,168 @@ interface SettingsDialogProps {
 
 export const SettingsDialog: FC<SettingsDialogProps> = ({ isOpen, onClose }) => {
   const { settings, updateSettings } = useSettings();
+  const [mounted, setMounted] = useState(false);
 
-  return (
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isOpen]);
+
+  if (!mounted || typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+        <motion.div
+          key="settings-overlay"
+          role="presentation"
+          className="fixed inset-0 z-[200] flex min-h-0 items-center justify-center p-4 sm:p-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            aria-label="Close settings"
             onClick={onClose}
           />
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-20 right-6 w-full max-w-md z-50"
-          >
-            <div className="glass-card p-6 overflow-hidden">
-              {/* Header */}
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-primary-light to-primary bg-clip-text text-transparent">
-                  Customize Experience
-                </h2>
-                <button
-                  onClick={onClose}
-                  className="p-2 hover:bg-surface/50 rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
 
-              <div className="space-y-8">
-                {/* AI Personality */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                      <MessageSquare className="w-4 h-4 text-primary-light" />
-                    </div>
-                    <label className="text-lg font-medium">
-                      AI Personality
-                    </label>
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="settings-title"
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.98 }}
+            transition={{ type: 'spring', damping: 30, stiffness: 360 }}
+            className="relative z-10 flex h-[min(90dvh,calc(100dvh-2rem))] w-full max-w-md min-h-0 flex-col overflow-hidden rounded-2xl border border-line/80 bg-panel/95 shadow-panel backdrop-blur-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex shrink-0 items-start justify-between gap-3 border-b border-line/60 px-5 py-4">
+              <div className="min-w-0 pr-2">
+                <h2 id="settings-title" className="text-lg font-semibold text-white">
+                  Preferences
+                </h2>
+                <p className="mt-1 text-xs text-muted">Applied to your next message.</p>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="btn-icon h-9 w-9 shrink-0 rounded-lg"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4">
+              <div className="space-y-8 pb-2">
+                <section className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-medium text-white">
+                    <MessageSquare className="h-4 w-4 shrink-0 text-accent" />
+                    Tone
                   </div>
                   <select
                     value={settings.aiPersonality}
-                    onChange={(e) => updateSettings({ aiPersonality: e.target.value as any })}
-                    className="input w-full"
+                    onChange={(e) =>
+                      updateSettings({
+                        aiPersonality: e.target.value as typeof settings.aiPersonality,
+                      })
+                    }
+                    className="select-field"
                   >
-                    <option value="default">Balanced Assistant</option>
-                    <option value="professional">Professional Expert</option>
-                    <option value="friendly">Friendly Helper</option>
-                    <option value="concise">Concise Advisor</option>
+                    <option value="default">Balanced</option>
+                    <option value="professional">Professional</option>
+                    <option value="friendly">Friendly</option>
+                    <option value="concise">Concise</option>
                   </select>
-                </div>
+                </section>
 
-                {/* Response Format */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                      <Layout className="w-4 h-4 text-primary-light" />
-                    </div>
-                    <label className="text-lg font-medium">
-                      Response Format
-                    </label>
+                <section className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-medium text-white">
+                    <Layout className="h-4 w-4 shrink-0 text-accent" />
+                    Response shape
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    {['default', 'bullet', 'paragraph', 'stepByStep'].map((format) => (
+                  <div className="grid grid-cols-2 gap-2">
+                    {(
+                      [
+                        ['default', 'Default'],
+                        ['bullet', 'Bullets'],
+                        ['paragraph', 'Paragraphs'],
+                        ['stepByStep', 'Steps'],
+                      ] as const
+                    ).map(([value, label]) => (
                       <button
-                        key={format}
-                        onClick={() => updateSettings({ responseFormat: format as any })}
-                        className={`p-4 rounded-xl border transition-all duration-200 ${
-                          settings.responseFormat === format
-                            ? 'border-primary bg-primary/10'
-                            : 'border-white/10 hover:border-primary/50'
+                        key={value}
+                        type="button"
+                        onClick={() => updateSettings({ responseFormat: value })}
+                        className={`rounded-xl border px-3 py-2.5 text-left text-sm transition ${
+                          settings.responseFormat === value
+                            ? 'border-accent/50 bg-accent/10 text-white'
+                            : 'border-line bg-elevated/50 text-muted hover:border-zinc-600'
                         }`}
                       >
-                        <span className="capitalize">{format.replace(/([A-Z])/g, ' $1').trim()}</span>
+                        {label}
                       </button>
                     ))}
                   </div>
-                </div>
+                </section>
 
-                {/* Code Blocks */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                      <Zap className="w-4 h-4 text-primary-light" />
-                    </div>
-                    <label className="text-lg font-medium">
-                      Code Display
-                    </label>
+                <section className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-medium text-white">
+                    <Zap className="h-4 w-4 shrink-0 text-accent" />
+                    Code blocks
                   </div>
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-3 p-3 rounded-lg border border-white/10 hover:border-primary/50 transition-all duration-200">
-                      <input
-                        type="checkbox"
-                        checked={settings.codeBlocks.syntax}
-                        onChange={(e) => 
-                          updateSettings({
-                            codeBlocks: { ...settings.codeBlocks, syntax: e.target.checked }
-                          })
-                        }
-                        className="rounded border-white/20 bg-surface/50 text-primary focus:ring-primary"
-                      />
-                      <div>
-                        <span className="font-medium">Syntax Highlighting</span>
-                        <p className="text-sm text-text-secondary">Colorize code for better readability</p>
-                      </div>
-                    </label>
-                    <label className="flex items-center gap-3 p-3 rounded-lg border border-white/10 hover:border-primary/50 transition-all duration-200">
-                      <input
-                        type="checkbox"
-                        checked={settings.codeBlocks.lineNumbers}
-                        onChange={(e) => 
-                          updateSettings({
-                            codeBlocks: { ...settings.codeBlocks, lineNumbers: e.target.checked }
-                          })
-                        }
-                        className="rounded border-white/20 bg-surface/50 text-primary focus:ring-primary"
-                      />
-                      <div>
-                        <span className="font-medium">Line Numbers</span>
-                        <p className="text-sm text-text-secondary">Show line numbers in code blocks</p>
-                      </div>
-                    </label>
-                  </div>
-                </div>
+                  <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-elevated/40 px-3 py-3 hover:border-zinc-600">
+                    <input
+                      type="checkbox"
+                      checked={settings.codeBlocks.syntax}
+                      onChange={(e) =>
+                        updateSettings({
+                          codeBlocks: { ...settings.codeBlocks, syntax: e.target.checked },
+                        })
+                      }
+                      className="mt-1 rounded border-line bg-canvas text-accent focus:ring-accent"
+                    />
+                    <span>
+                      <span className="block text-sm text-white">Syntax highlighting</span>
+                      <span className="text-xs text-muted">Colorized fenced code</span>
+                    </span>
+                  </label>
+                  <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-elevated/40 px-3 py-3 hover:border-zinc-600">
+                    <input
+                      type="checkbox"
+                      checked={settings.codeBlocks.lineNumbers}
+                      onChange={(e) =>
+                        updateSettings({
+                          codeBlocks: { ...settings.codeBlocks, lineNumbers: e.target.checked },
+                        })
+                      }
+                      className="mt-1 rounded border-line bg-canvas text-accent focus:ring-accent"
+                    />
+                    <span>
+                      <span className="block text-sm text-white">Line numbers</span>
+                      <span className="text-xs text-muted">When supported by highlighter</span>
+                    </span>
+                  </label>
+                </section>
               </div>
             </div>
           </motion.div>
-        </>
+        </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };

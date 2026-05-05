@@ -1,95 +1,67 @@
 import { FC } from 'react';
-import { Bot, MessageSquare, Zap, Code } from 'lucide-react';
+import { MessageSquare, Terminal, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2
-    }
-  }
-};
+interface EmptyStateProps {
+  hasModels: boolean;
+  modelName?: string;
+}
 
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 }
-};
-
-export const EmptyState: FC = () => {
+export const EmptyState: FC<EmptyStateProps> = ({ hasModels, modelName }) => {
   return (
-    <div className="flex flex-col items-center justify-center h-full text-center p-8">
+    <div className="flex h-full min-h-[320px] flex-col items-center justify-center px-4 py-12 text-center">
       <motion.div
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="relative"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="max-w-md"
       >
-        <div className="w-24 h-24 rounded-3xl bg-primary/20 border border-primary/30 flex items-center justify-center mb-8 animate-float">
-          <Bot className="w-12 h-12 text-primary-light" />
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/10 ring-1 ring-accent/20">
+          <Terminal className="h-8 w-8 text-accent" />
         </div>
-        <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-success/20 border border-success/30 flex items-center justify-center animate-pulse">
-          <div className="w-3 h-3 rounded-full bg-success" />
-        </div>
+        <h2 className="text-2xl font-semibold tracking-tight text-white">Start a conversation</h2>
+        <p className="mt-3 text-sm leading-relaxed text-muted">
+          {hasModels && modelName ? (
+            <>
+              You are using <span className="font-mono text-accent-glow">{modelName}</span>. Ask
+              anything — responses stay on your machine.
+            </>
+          ) : (
+            <>
+              Pull a model with{' '}
+              <code className="rounded-md bg-elevated px-1.5 py-0.5 font-mono text-xs text-zinc-200">
+                ollama pull llama3.2
+              </code>{' '}
+              then refresh the model list in the header.
+            </>
+          )}
+        </p>
       </motion.div>
-      
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="max-w-2xl"
-      >
-        <motion.div variants={item}>
-          <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-primary-light to-primary bg-clip-text text-transparent">
-            Welcome to AI Assistant
-          </h2>
-          
-          <p className="text-text-secondary text-lg mb-12 max-w-md mx-auto">
-            Your intelligent companion for productive conversations. Ask anything!
-          </p>
-        </motion.div>
 
-        <motion.div 
-          variants={container}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto"
-        >
-          <Feature
-            icon={MessageSquare}
-            title="Natural Chat"
-            description="Engage in fluid, context-aware discussions"
-          />
-          <Feature
-            icon={Zap}
-            title="Quick Responses"
-            description="Get instant, accurate answers"
-          />
-          <Feature
-            icon={Code}
-            title="Code Support"
-            description="Get help with programming"
-          />
-        </motion.div>
-      </motion.div>
+      <motion.ul
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.15, duration: 0.35 }}
+        className="mt-12 grid w-full max-w-lg grid-cols-1 gap-3 text-left sm:grid-cols-3"
+      >
+        <Hint icon={MessageSquare} title="Private" body="No cloud API required for chat." />
+        <Hint icon={Zap} title="Pick any model" body="Use whatever you have pulled in Ollama." />
+        <Hint icon={Terminal} title="Open source" body="Fork, theme, and ship your own build." />
+      </motion.ul>
     </div>
   );
 };
 
-interface FeatureProps {
-  icon: FC<{ className?: string }>;
-  title: string;
-  description: string;
-}
-
-const Feature: FC<FeatureProps> = ({ icon: Icon, title, description }) => (
-  <motion.div 
-    variants={item}
-    className="glass-effect p-6 rounded-2xl hover:bg-surface/50 transition-colors duration-300"
-  >
-    <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mb-4 mx-auto">
-      <Icon className="w-6 h-6 text-primary-light" />
+const Hint: FC<{ icon: typeof MessageSquare; title: string; body: string }> = ({
+  icon: Icon,
+  title,
+  body,
+}) => (
+  <li className="rounded-xl border border-line/80 bg-elevated/50 px-4 py-3">
+    <div className="flex items-center gap-2 text-sm font-medium text-white">
+      <Icon className="h-4 w-4 text-accent" />
+      {title}
     </div>
-    <h3 className="font-semibold text-lg mb-2">{title}</h3>
-    <p className="text-sm text-text-secondary">{description}</p>
-  </motion.div>
+    <p className="mt-1 text-xs leading-snug text-muted">{body}</p>
+  </li>
 );

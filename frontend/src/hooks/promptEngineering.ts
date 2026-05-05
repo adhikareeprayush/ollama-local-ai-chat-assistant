@@ -21,6 +21,8 @@ export const formatPrompt = (prompt: string, settings: Settings): string => {
   return `
 Important: Respond directly without using any prefixes like "BOT:", "ASSISTANT:", or similar markers.
 
+When you use fenced code blocks, use GitHub-flavored markdown: put the optional language right after the opening fence, then a newline, then the code, then a line containing only the closing fence (three grave accents). Never put the closing fence as two grave accents plus one.
+
 ${formatInstruction}
 ${personalityInstruction}
 

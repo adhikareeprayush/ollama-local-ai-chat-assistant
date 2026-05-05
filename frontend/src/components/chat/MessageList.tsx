@@ -10,7 +10,7 @@ interface MessageListProps {
 
 export const MessageList: FC<MessageListProps> = ({ messages, isLoading }) => {
   return (
-    <div className="space-y-6">
+    <div className="mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-8 pb-6 pt-1">
       {messages.map((message) => (
         <MessageBubble key={message.id} message={message} />
       ))}

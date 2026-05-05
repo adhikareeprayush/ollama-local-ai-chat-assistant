@@ -1,85 +1,78 @@
 import { FC, FormEvent, useState, useRef, useEffect } from 'react';
-import { Send, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowUp } from 'lucide-react';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => Promise<void>;
   isLoading: boolean;
+  disabled?: boolean;
 }
 
-export const ChatInput: FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
+export const ChatInput: FC<ChatInputProps> = ({ onSendMessage, isLoading, disabled }) => {
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
   }, [message]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    e.stopPropagation(); // Prevent event bubbling
-    
-    if (!message.trim() || isLoading) return;
+    if (!message.trim() || isLoading || disabled) return;
 
     const currentMessage = message;
     setMessage('');
-    
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
 
     try {
       await onSendMessage(currentMessage);
-    } catch (error) {
+    } catch {
       setMessage(currentMessage);
-      console.error('Failed to send message:', error);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      e.stopPropagation(); // Prevent event bubbling
       formRef.current?.requestSubmit();
     }
   };
 
+  const blocked = isLoading || disabled;
+
   return (
-    <form 
-      ref={formRef}
-      onSubmit={handleSubmit}
-      className="relative group"
-      autoComplete="off"
-    >
+    <form ref={formRef} onSubmit={handleSubmit} className="flex items-end gap-2" autoComplete="off">
       <textarea
         ref={textareaRef}
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Type your message..."
-        className="input w-full resize-none max-h-32 pr-24 min-h-[52px]"
-        disabled={isLoading}
+        placeholder={
+          disabled ? 'Add a model in Ollama to start chatting…' : 'Message your local model…'
+        }
+        className="field max-h-[200px] min-h-[48px] flex-1 resize-none py-3.5"
+        disabled={blocked}
         rows={1}
         autoFocus
         name="message"
       />
-      <motion.button
+      <button
         type="submit"
-        disabled={isLoading || !message.trim()}
-        className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-primary py-2"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        disabled={blocked || !message.trim()}
+        className="btn-accent mb-0.5 h-11 w-11 shrink-0 rounded-xl p-0"
+        title="Send"
       >
         {isLoading ? (
-          <Loader2 className="w-5 h-5 animate-spin" />
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-canvas/30 border-t-canvas" />
         ) : (
-          <Send className="w-5 h-5" />
+          <ArrowUp className="h-5 w-5" strokeWidth={2.5} />
         )}
-      </motion.button>
+      </button>
     </form>
   );
 };

@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { twMerge } from 'tailwind-merge';
 import { Message } from '../../types';
 import { Markdown } from '../common/Markdown';
-import { Avatar } from '../common/Avatar';
 
 interface MessageBubbleProps {
   message: Message;
@@ -21,55 +20,72 @@ export const MessageBubble: FC<MessageBubbleProps> = memo(({ message }) => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
+    <motion.article
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3 }}
-      className={twMerge(
-        "flex items-start gap-4 px-4 group",
-        isUser ? "flex-row-reverse" : "flex-row"
-      )}
+      transition={{ duration: 0.2 }}
+      className={twMerge('flex w-full min-w-0', isUser ? 'justify-end' : 'justify-start')}
     >
-      <Avatar
-        icon={isUser ? User : Bot}
-        className={twMerge(
-          "transition-transform duration-300 group-hover:scale-110",
-          isUser ? "bg-primary/20 border-primary/30" : "bg-surface/50 border-white/20"
-        )}
-      />
       <div
         className={twMerge(
-          "relative px-6 py-4 rounded-2xl max-w-[80%] break-words transition-all duration-300",
-          isUser 
-            ? "bg-primary/10 border border-primary/20 hover:bg-primary/15" 
-            : "glass-effect hover:bg-surface/50"
+          'flex min-w-0 gap-3',
+          isUser ? 'max-w-[min(100%,28rem)] flex-row-reverse' : 'w-full max-w-full flex-row sm:max-w-[48rem]'
         )}
       >
-        <Markdown content={message.text} />
-        <div className="absolute bottom-2 right-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <time className="text-xs text-text-secondary">
-            {new Date(message.timestamp).toLocaleTimeString([], { 
-              hour: '2-digit', 
-              minute: '2-digit' 
-            })}
-          </time>
-          {!isUser && (
-            <button
-              onClick={handleCopy}
-              className="p-1 rounded-lg hover:bg-surface/50 transition-colors"
-              title={copied ? "Copied!" : "Copy message"}
-            >
-              {copied ? (
-                <Check className="w-4 h-4 text-success" />
-              ) : (
-                <Copy className="w-4 h-4 text-text-secondary" />
-              )}
-            </button>
+        <div
+          className={twMerge(
+            'mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border',
+            isUser ? 'border-accent/35 bg-accent/12 text-accent' : 'border-line bg-elevated text-zinc-400'
           )}
+          aria-hidden
+        >
+          {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+        </div>
+
+        <div className="min-w-0 flex-1 space-y-2">
+          <div
+            className={twMerge(
+              'rounded-2xl border px-4 py-3 shadow-sm',
+              isUser
+                ? 'border-accent/25 bg-accent/[0.12] text-zinc-100'
+                : 'border-line/90 bg-elevated/95 text-zinc-100'
+            )}
+          >
+            {isUser ? (
+              <div className="message-plain text-[15px] leading-relaxed text-zinc-100">
+                {message.text}
+              </div>
+            ) : (
+              <div className="min-w-0 overflow-x-auto">
+                <Markdown content={message.text} />
+              </div>
+            )}
+          </div>
+
+          <div
+            className={twMerge(
+              'flex items-center gap-2 px-0.5 text-[11px] text-zinc-500',
+              isUser ? 'justify-end' : 'justify-between'
+            )}
+          >
+            {!isUser && (
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1 font-medium text-zinc-400 transition hover:bg-line/40 hover:text-zinc-200"
+                title={copied ? 'Copied' : 'Copy'}
+              >
+                {copied ? <Check className="h-3.5 w-3.5 text-accent" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? 'Copied' : 'Copy'}
+              </button>
+            )}
+            <time className="tabular-nums" dateTime={message.timestamp.toISOString()}>
+              {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </time>
+          </div>
         </div>
       </div>
-    </motion.div>
+    </motion.article>
   );
 });
 

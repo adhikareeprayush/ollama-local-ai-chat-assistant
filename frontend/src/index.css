@@ -2,66 +2,124 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    @apply bg-canvas text-zinc-100;
+  }
+
+  body {
+    @apply min-h-screen font-sans;
+  }
+}
+
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1f2937;
-  border-radius: 4px;
+  @apply bg-canvas;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #4b5563;
-  border-radius: 4px;
+  @apply rounded-full bg-zinc-700 hover:bg-zinc-600;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+/* Markdown — assistant messages */
+.message-plain {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
-/* Markdown Styles */
-.prose {
-  @apply text-sm text-gray-100;
+.prose-chat {
+  @apply prose prose-invert max-w-none text-[15px] leading-relaxed text-zinc-200;
+  @apply prose-headings:scroll-mt-4 prose-headings:font-semibold prose-headings:text-zinc-50;
+  @apply prose-h1:text-xl prose-h2:text-lg prose-h3:text-base;
+  @apply prose-p:my-3 prose-p:leading-relaxed;
+  @apply prose-ul:my-3 prose-ol:my-3 prose-li:my-1;
+  @apply prose-blockquote:border-line prose-blockquote:text-zinc-300;
+  @apply prose-hr:border-line;
+  @apply break-words [overflow-wrap:anywhere];
 }
 
-.prose a {
-  @apply text-blue-400 hover:text-blue-300;
+.prose-chat > *:first-child {
+  margin-top: 0;
 }
 
-.prose strong {
-  @apply text-white;
+.prose-chat > *:last-child {
+  margin-bottom: 0;
 }
 
-.prose ul {
-  @apply list-disc list-inside;
+.prose-chat a {
+  @apply text-accent no-underline hover:text-accent-glow;
 }
 
-.prose ol {
-  @apply list-decimal list-inside;
+.prose-chat strong {
+  @apply text-white font-semibold;
 }
 
-.prose blockquote {
-  @apply border-l-4 border-gray-600 pl-4 italic;
+.prose-chat code {
+  @apply font-mono text-sm text-accent-glow;
 }
 
-.prose code {
-  @apply text-blue-300;
+.prose-chat pre {
+  @apply rounded-xl border border-line bg-canvas/80;
 }
 
-.prose pre {
-  @apply my-2;
+.prose-chat pre code {
+  @apply text-zinc-200;
 }
 
-.prose table {
-  @apply border-collapse border border-gray-700;
+/* highlight.js (rehype-highlight) */
+.hljs-comment,
+.hljs-quote {
+  @apply text-zinc-500;
+}
+.hljs-keyword,
+.hljs-selector-tag {
+  @apply text-pink-400;
+}
+.hljs-string,
+.hljs-meta .hljs-string {
+  @apply text-emerald-300;
+}
+.hljs-title,
+.hljs-section,
+.hljs-name {
+  @apply text-sky-300;
+}
+.hljs-number,
+.hljs-literal {
+  @apply text-amber-300;
 }
 
-.prose th,
-.prose td {
-  @apply border border-gray-700 px-3 py-1;
-}
+@layer components {
+  .surface-panel {
+    @apply bg-panel/90 backdrop-blur-md border border-line/80 rounded-2xl shadow-panel;
+  }
 
-.prose th {
-  @apply bg-gray-800;
+  .btn-icon {
+    @apply inline-flex items-center justify-center rounded-xl border border-line/60 bg-elevated/80
+      text-zinc-300 transition hover:border-accent/40 hover:bg-elevated hover:text-white
+      disabled:opacity-40 disabled:pointer-events-none;
+  }
+
+  .btn-accent {
+    @apply inline-flex items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold
+      text-canvas shadow-glow transition hover:brightness-110 disabled:opacity-45 disabled:pointer-events-none;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-line bg-elevated/90 px-3 py-2.5 text-sm text-zinc-100
+      outline-none transition focus:border-accent/50 focus:ring-1 focus:ring-accent/30;
+  }
+
+  .select-field {
+    @apply field appearance-none cursor-pointer pr-9;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a1a1aa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+    background-size: 1rem;
+  }
 }
